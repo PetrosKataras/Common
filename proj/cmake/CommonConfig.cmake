@@ -35,7 +35,7 @@ if( NOT TARGET Common )
 			COMMAND ${CMAKE_COMMAND} -E copy_directory
 			${COMMON_ASSETS_PATH} ${COMMON_ASSETS_DEST_PATH}
 		)
-	elseif( BUILD_TESTS MATCHES OFF ) # if COMMON_ASSETS_DEST_PATH is not valid and we are not building the tests issue a warning
+	elseif( NOT BUILD_TESTS ) # if COMMON_ASSETS_DEST_PATH is not valid and we are not building the tests issue a warning
 		message( WARNING "Destination path for common assets is either not set or not a valid directory!" )
 	endif()
 endif()
