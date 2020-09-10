@@ -19,6 +19,7 @@ else()
 	message( STATUS "Cinder path: " ${CINDER_PATH} )
 endif()
 
+set( SKIP_ASSETS_COPY TRUE INTERNAL )
 find_package( Common REQUIRED PATHS
 	"${CMAKE_CURRENT_LIST_DIR}/proj/cmake"
 )
