@@ -1,6 +1,5 @@
 if( NOT TARGET Common )
 	option( DISABLE_FX_MODULE "Build Common with support for the FX's." OFF )
-	option( BUILD_TESTS "Build Common tests" OFF )
 	get_filename_component( COMMON_SOURCE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../src" ABSOLUTE )
 	get_filename_component( COMMON_ASSETS_PATH "${CMAKE_CURRENT_LIST_DIR}/../../assets" ABSOLUTE )
 	# Find Cinder
@@ -31,13 +30,12 @@ if( NOT TARGET Common )
 		set( BUILD_FX_TESTS TRUE )
 	endif()
 	target_link_libraries( Common PRIVATE cinder )
-	if( BUILD_TESTS MATCHES ON )
-		include( "${CMAKE_CURRENT_LIST_DIR}/../../tests/CMakeLists.txt" )
-	endif()
 	if( COMMON_ASSETS_DEST_PATH AND IS_DIRECTORY "${COMMON_ASSETS_DEST_PATH}" )
 		add_custom_command( TARGET Common POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy_directory
 			${COMMON_ASSETS_PATH} ${COMMON_ASSETS_DEST_PATH}
 		)
+	elseif( BUILD_TESTS MATCHES OFF ) # if COMMON_ASSETS_DEST_PATH is not valid and we are not building the tests issue a warning
+		message( WARNING "Destination path for common assets is either not set or not a valid directory!" )
 	endif()
 endif()
