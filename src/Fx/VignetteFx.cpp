@@ -1,9 +1,6 @@
 #include "Fx/VignetteFx.h"
+#include "cinder/Log.h"
 #include "cinder/app/AppBase.h"
-
-#if defined( USE_CINDER_IMGUI )
-    #include "CinderImGui.h"
-#endif
 
 using namespace ci;
 

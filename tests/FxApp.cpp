@@ -37,6 +37,7 @@ void FxApp::setup()
 
 void FxApp::update()
 {
+	if( mFxChain ) mFxChain->update();
 }
 
 void FxApp::draw()

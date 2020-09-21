@@ -2,9 +2,6 @@
 #include "cinder/app/AppBase.h"
 #include "cinder/Log.h"
 #include "cinder/Camera.h"
-#if defined( USE_CINDER_IMGUI )
-    #include "CinderImGui.h"
-#endif
 
 using namespace ci;
 

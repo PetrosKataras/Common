@@ -1,10 +1,6 @@
 #include "Fx/ColorCorrectionFx.h"
 #include "cinder/app/AppBase.h"
 
-#if defined( USE_CINDER_IMGUI )
-    #include "CinderImGui.h"
-#endif
-
 using namespace ci;
 
 ColorCorrectionFx::ColorCorrectionFx()
