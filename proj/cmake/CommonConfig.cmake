@@ -14,6 +14,10 @@ if( NOT TARGET Common )
 	list( APPEND COMMON_SOURCES ${COMMON_SOURCE_PATH}/RIR/IndieResolutionRenderer.cpp )
 	add_library( Common STATIC ${COMMON_SOURCES} )
 	target_include_directories( Common PUBLIC "${COMMON_SOURCE_PATH}" )
+	# Common defines
+	if( ENABLE_GUI )
+		target_compile_definitions( Common PUBLIC "-DUSE_CINDER_IMGUI" )
+	endif()
 	# Fx
 	if( DISABLE_FX_MODULE MATCHES OFF )
 		list( APPEND FX_SOURCES 

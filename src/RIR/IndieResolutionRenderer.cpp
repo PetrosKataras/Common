@@ -5,21 +5,36 @@
 #include "cinder/Log.h"
 
 #if defined( USE_CINDER_IMGUI )
-    #include "CinderImGui.h"
+    #include "cinder/CinderImGui.h"
+	namespace ui = ImGui;
 #endif
 
-IndieResolutionRenderer::IndieResolutionRenderer( ci::vec2 virtualSize, const ci::vec2 windowSize, ci::gl::Fbo::Format fboFormat )
-: mVirtualSize( virtualSize )
-, mWindowSize( windowSize )
+static uint16_t sRendererCount = 0;
+IndieResolutionRenderer::IndieResolutionRenderer( const Options options )
 {
-    mFbo            = ci::gl::Fbo::create( virtualSize.x, virtualSize.y, fboFormat );
+#if defined( USE_CINDER_IMGUI )
+	// it's a no-op if already initialized
+	ui::Initialize( ui::Options().iniPath( ci::app::getAssetPath( "imgui.ini" ) ) );
+#endif
+	mRendererName = options.name();
+	if( mRendererName.empty() ) {
+		mRendererName = "Renderer_" + std::to_string( sRendererCount );
+	}	
+	sRendererCount++;
+
+	mVirtualSize = options.virtualPixelSize();
+	auto fboFormat = options.fboFormat();
+    mFbo            = ci::gl::Fbo::create( mVirtualSize.x, mVirtualSize.y, fboFormat );
     mShader         = ci::gl::context()->getStockShader( ci::gl::ShaderDef().color().texture() );
-    mCenter         = mWindowSize / 2.0f;
+	mScreenSize = options.screenPixelSize();
+    mCenter         = mScreenSize / 2.0f;
     mCenterLerp     = mCenter;
+
+	mDebugColor		= options.debugColor();
 
     connectSignals();
 
-    resize();
+    updateView();
 
     ci::gl::ScopedFramebuffer scopedBuffer( mFbo );
     ci::gl::clear( mClearColor );
@@ -28,7 +43,7 @@ IndieResolutionRenderer::IndieResolutionRenderer( ci::vec2 virtualSize, const ci
 void IndieResolutionRenderer::connectSignals()
 {
     mConnectionAppUpdate = ci::app::AppBase::get()->getSignalUpdate().connect ( 
-        std::bind( &IndieResolutionRenderer::update, this )
+        std::bind( &IndieResolutionRenderer::updateUI, this )
     );
     mConnectionAppMouseDown = ci::app::AppBase::get()->getWindow()->getSignalMouseDown().connect( 
         std::bind( &IndieResolutionRenderer::mouseDown, this, std::placeholders::_1 )
@@ -40,7 +55,7 @@ void IndieResolutionRenderer::connectSignals()
         std::bind( &IndieResolutionRenderer::mouseDrag, this, std::placeholders::_1 )
     );
     mConnectionAppResize = ci::app::AppBase::get()->getWindow()->getSignalResize().connect( 
-        std::bind( &IndieResolutionRenderer::resize, this )
+        std::bind( &IndieResolutionRenderer::updateView, this )
     );
 }
 
@@ -78,43 +93,15 @@ void IndieResolutionRenderer::unbind()
 
 void IndieResolutionRenderer::update()
 {
-#if defined( USE_CINDER_IMGUI )
-    if( mShowUI ) {
-        ui::ScopedWindow window( "IndieResolutionRenderer" );
-        if( ui::Button( "Re-Center" ) ) {
-            setCenter( mWindowSize * .5f );
-        }
-        ui::SameLine();
-        if( ui::Button( "Reset View" ) ) {
-            resetView();
-        }
-        ui::Separator();
-        {
-            ui::SliderFloat( "Center X", &mCenterLerp[0], 0.0f, mWindowSize.x, "%5.0f" );
-            ui::SliderFloat( "Center Y", &mCenterLerp[1], 0.0f, mWindowSize.y, "%5.0f" );
-        }
-        ui::Separator();
-        if( ui::Button( "Reset Zoom" ) ) {
-            setZoomFactor( 1.0f );
-        }
-        if( ui::SliderFloat( "Zoom", &mZoomFactor, 0.0f, 3.0f, "%.2f" ) ) {
-            resize();
-        }
-    }
-#endif
-    mCenter = ci::lerp( mCenter, mCenterLerp, mLerpSpeed );
 }
 
-void IndieResolutionRenderer::resize()
+void IndieResolutionRenderer::updateView()
 {
 	auto fboBounds			= mFbo->getBounds();
-    mScreenRect             = ci::Rectf( fboBounds ).getCenteredFit( ci::Rectf( mCenter.x - mWindowSize.x * .5f, mCenter.y - mWindowSize.y * .5f, mCenter.x + mWindowSize.x * .5f, mCenter.y + mWindowSize.y * .5f ), false ).scaledCentered( mZoomFactor );
+    mScreenRect             = ci::Rectf( fboBounds ).getCenteredFit( ci::Rectf( mCenter.x - mScreenSize.x * .5f, mCenter.y - mScreenSize.y * .5f, mCenter.x + mScreenSize.x * .5f, mCenter.y + mScreenSize.y * .5f ), false ).scaledCentered( mZoomFactor );
     auto rectGeom           = ci::geom::Rect().rect( mScreenRect );
     auto rectMesh           = ci::gl::VboMesh::create( rectGeom );
     mBatch                  = ci::gl::Batch::create( rectMesh, mShader );
-	mCenter					= mWindowSize * .5f;
-    mCenterLerp             = mCenter;
-    mLerpSpeed              = 1.0f;
 }
 
 void IndieResolutionRenderer::render()
@@ -123,6 +110,10 @@ void IndieResolutionRenderer::render()
     {
         ci::gl::ScopedTextureBind scopedTexture( mFbo->getColorTexture() );
         ci::gl::ScopedModelMatrix modelMatrix;
+		if( mDebug ) {
+			ci::gl::ScopedColor debugScreenRectColor( mDebugColor );
+			ci::gl::drawSolidRect( mScreenRect.scaledCentered( ci::vec2( 1.03f ) ) );
+		}
         ci::gl::translate( mCenter - mScreenRect.getCenter() );
         mBatch->draw();
     }
@@ -139,7 +130,7 @@ ci::vec2 IndieResolutionRenderer::getVirtualMousePosition( ci::vec2 mousePos )
 void IndieResolutionRenderer::setZoomFactor( const float& zoomFactor )
 {
     mZoomFactor = zoomFactor;
-    resize();
+    updateView();
 }
 
 void IndieResolutionRenderer::setCenter( const ci::vec2& center )
@@ -148,6 +139,7 @@ void IndieResolutionRenderer::setCenter( const ci::vec2& center )
 	mCenter = center;
 	mScreenRect.offsetCenterTo( center );
     setLerpSpeed( 1.0f );
+	updateView();
 }
 
 void IndieResolutionRenderer::panTo( const ci::vec2& panTo, const float& lerpSpeed )
@@ -163,9 +155,9 @@ void IndieResolutionRenderer::setLerpSpeed( const float& lerpSpeed )
 
 void IndieResolutionRenderer::resetView()
 {
-    mCenter     = mWindowSize * .5f;
+    mCenter     = mScreenRect.getCenter();
     mZoomFactor = 1.0f;
-    resize();
+    updateView();
 }
 
 void IndieResolutionRenderer::mouseDown( ci::app::MouseEvent event )
@@ -219,4 +211,30 @@ void IndieResolutionRenderer::showUI( bool show )
 {
     mShowUI = show;
 }
+
+void IndieResolutionRenderer::updateUI()
+{
+    if( mShowUI ) {
+        ui::ScopedWindow window( mRendererName.c_str() );
+        if( ui::Checkbox( "Debug", &mDebug ) ) {
+        }
+        ui::Separator();
+		if( ui::InputFloat2( "Center", &mCenter[0] ) ) {
+			setCenter( mCenter );
+		}
+        ui::Separator();
+        if( ui::Button( "Reset Zoom" ) ) {
+            setZoomFactor( 1.0f );
+        }
+        if( ui::SliderFloat( "Zoom", &mZoomFactor, 0.0f, 3.0f, "%.2f" ) ) {
+            setZoomFactor( mZoomFactor );
+        }
+    }
+    mCenter = ci::lerp( mCenter, mCenterLerp, mLerpSpeed );
+}
 #endif
+
+void IndieResolutionRenderer::debug( bool enable )
+{
+	mDebug = enable;
+}

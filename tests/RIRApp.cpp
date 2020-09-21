@@ -18,6 +18,8 @@ class RIRApp : public App {
 	void draw() override;
 
   private:
+	IndieResolutionRendererPtr mIndieResRenderer;
+	IndieResolutionRendererPtr mIndieResRendererB;
 };
 
 void prepareSettings( RIRApp::Settings* settings )
@@ -27,15 +29,44 @@ void prepareSettings( RIRApp::Settings* settings )
 
 void RIRApp::setup()
 {
+	auto options = IndieResolutionRenderer::Options().name( "Renderer 1" )
+						.virtualPixelSize( ci::app::getWindowSize() * 2 )
+						.screenPixelSize( ci::vec2( ci::app::getWindowSize() ) * .5f )
+						.debugColor( ci::Color( 1.0f, 1.0f, .0f ) ) ;
+	mIndieResRenderer = std::make_unique<IndieResolutionRenderer>( options );
+	mIndieResRenderer->setClearColor( ci::Color( 1.0f, 0.f, 0.f ) );
+	mIndieResRenderer->setCenter( ci::vec2( ci::app::getWindowSize() ) * .25f );
+
+	options.name( "Renderer 2" ).debugColor( ci::Color( 0.f, 1.0f, 1.0f ) );
+	mIndieResRendererB = std::make_unique<IndieResolutionRenderer>( options );
+	mIndieResRendererB->setClearColor( ci::Color( .0f, 1.f, 0.f ) );
+	mIndieResRendererB->setCenter( ci::vec2( ci::app::getWindowSize() ) * .75f );
 }
 
 void RIRApp::update()
 {
+	if( mIndieResRenderer ) {
+		mIndieResRenderer->update();
+		mIndieResRenderer->bind();
+		mIndieResRenderer->unbind();
+	}
+
+	if( mIndieResRendererB ) {
+		mIndieResRendererB->update();
+		mIndieResRendererB->bind();
+		mIndieResRendererB->unbind();
+	}
+
 }
 
 void RIRApp::draw()
 {
 	gl::clear( Color::gray( 0.1f ) );
+	if( mIndieResRenderer ) 
+		mIndieResRenderer->render();
+
+	if( mIndieResRendererB ) 
+		mIndieResRendererB->render();
 }
 
 void RIRApp::mouseDrag( MouseEvent event )
