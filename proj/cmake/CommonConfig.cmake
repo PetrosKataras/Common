@@ -1,5 +1,5 @@
 if( NOT TARGET Common )
-	option( DISABLE_FX_MODULE "Build Common with support for the FX's." OFF )
+	option( DISABLE_FX_MODULE "Build Common without support for the FX's." OFF )
 	get_filename_component( COMMON_SOURCE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../src" ABSOLUTE )
 	get_filename_component( COMMON_ASSETS_PATH "${CMAKE_CURRENT_LIST_DIR}/../../assets" ABSOLUTE )
 	# Find Cinder
