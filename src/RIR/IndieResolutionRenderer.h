@@ -85,8 +85,8 @@ public:
 private:
     bool                    mShowUI{ true };
 	void					updateUI();
-    void                    updateView();
 #endif
+    void                    updateView();
 private:
     void                    connectSignals();
 	void 					disconnectSignals();

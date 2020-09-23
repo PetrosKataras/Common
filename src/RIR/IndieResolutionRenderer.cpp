@@ -42,9 +42,11 @@ IndieResolutionRenderer::IndieResolutionRenderer( const Options options )
 
 void IndieResolutionRenderer::connectSignals()
 {
+#if defined( USE_CINDER_IMGUI )
     mConnectionAppUpdate = ci::app::AppBase::get()->getSignalUpdate().connect ( 
         std::bind( &IndieResolutionRenderer::updateUI, this )
     );
+#endif
     mConnectionAppMouseDown = ci::app::AppBase::get()->getWindow()->getSignalMouseDown().connect( 
         std::bind( &IndieResolutionRenderer::mouseDown, this, std::placeholders::_1 )
     );
