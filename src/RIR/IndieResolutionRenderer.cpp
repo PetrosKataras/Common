@@ -31,6 +31,7 @@ IndieResolutionRenderer::IndieResolutionRenderer( const Options options )
     mCenterLerp     = mCenter;
 
 	mDebugColor		= options.debugColor();
+	mAutoClear		= options.autoClear();
 
     connectSignals();
 
@@ -79,7 +80,9 @@ void IndieResolutionRenderer::bind()
 {
     mFbo->bindFramebuffer();
 	ci::gl::context()->blendFuncSeparate( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
-    ci::gl::clear( mClearColor );
+	if( mAutoClear ) {
+    	ci::gl::clear( mClearColor );
+	}
     ci::gl::pushViewport();
     ci::gl::viewport( std::make_pair( ci::vec2( 0 ), mVirtualSize ) );
     ci::gl::pushMatrices();

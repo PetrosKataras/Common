@@ -52,6 +52,13 @@ public:
 			return *this;
 		}
 		const ci::Color debugColor() const { return mDebugColor; }
+	
+		Options& autoClear( bool clear = true ) 
+		{
+			mAutoClear = clear; 
+			return *this;
+		}
+		const bool autoClear() const { return mAutoClear; }
 		
 	private:
 		std::string mName;
@@ -59,6 +66,7 @@ public:
 		ci::vec2 mScreenSize;
 		ci::gl::Fbo::Format mFboFormat;
 		ci::Color mDebugColor;
+		bool mAutoClear{ true };
 	};
     IndieResolutionRenderer( const Options options = Options() );
 	~IndieResolutionRenderer();
@@ -94,6 +102,7 @@ private:
     ci::gl::FboRef          mFbo;
     ci::vec2                mVirtualSize{ 0 };
     ci::vec2                mScreenSize{ 0 };
+	bool					mAutoClear{ true };
     ci::gl::BatchRef        mBatch;
     float                   mZoomFactor{ 1.0f };
     ci::gl::GlslProgRef     mShader;
