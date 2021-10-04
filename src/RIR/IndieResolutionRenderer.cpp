@@ -78,7 +78,7 @@ void IndieResolutionRenderer::disconnectSignals()
 
 void IndieResolutionRenderer::bind()
 {
-    mFbo->bindFramebuffer();
+	ci::gl::context()->pushFramebuffer( mFbo, GL_FRAMEBUFFER ); 
 	ci::gl::context()->blendFuncSeparate( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
 	if( mAutoClear ) {
     	ci::gl::clear( mClearColor );
@@ -93,7 +93,12 @@ void IndieResolutionRenderer::unbind()
 {
     ci::gl::popMatrices();
     ci::gl::popViewport();
-    mFbo->unbindFramebuffer();
+#if ! defined( CINDER_GL_HAS_FBO_MULTISAMPLING )
+    ci::gl::context()->popFramebuffer( GL_FRAMEBUFFER );
+#else
+    ci::gl::context()->popFramebuffer( GL_READ_FRAMEBUFFER );
+    ci::gl::context()->popFramebuffer( GL_DRAW_FRAMEBUFFER );
+#endif
 }
 
 void IndieResolutionRenderer::update()
