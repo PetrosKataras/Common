@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 2.8 FATAL_ERROR )
+cmake_minimum_required( VERSION 3.1 FATAL_ERROR )
 
 project( Common )
 
@@ -10,13 +10,15 @@ if( NOT DEFINED CINDER_PATH )
 	else()
 		if( NOT IS_ABSOLUTE $ENV{CINDER_PATH} )
 			get_filename_component( CINDER_PATH "$ENV{CINDER_PATH}" REALPATH BASE_DIR "${CMAKE_CURRENT_BINARY_DIR}" ) 
+		else()
+			set( CINDER_PATH "$ENV{CINDER_PATH}" )	
 		endif()
+	
 	endif()
 else()
 	if( NOT IS_ABSOLUTE ${CINDER_PATH} )
 		get_filename_component( CINDER_PATH "${CINDER_PATH}" REALPATH BASE_DIR "${CMAKE_CURRENT_BINARY_DIR}" ) 
 	endif()
-	message( STATUS "Cinder path: " ${CINDER_PATH} )
 endif()
 
 set( SKIP_ASSETS_COPY TRUE INTERNAL )

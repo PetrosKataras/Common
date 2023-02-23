@@ -45,7 +45,7 @@ void FxChain::update()
 
 gl::TextureRef FxChain::process( const gl::TextureRef colorTexture, const gl::TextureRef depthTexture, CameraPersp* camera )
 {
-	if( ! colorTexture || ! depthTexture )
+	if( ! colorTexture )
 		return nullptr;
 	
 	if( ( ! mPingPongFbo[ping] || ! mPingPongFbo[pong] )

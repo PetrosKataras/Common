@@ -26,6 +26,7 @@ if( NOT TARGET Common )
 			${COMMON_SOURCE_PATH}/Fx/FogFx.cpp 
 			${COMMON_SOURCE_PATH}/Fx/FxChain.cpp 
 			${COMMON_SOURCE_PATH}/Fx/VignetteFx.cpp 
+			${COMMON_SOURCE_PATH}/Fx/BlurFx.cpp 
 		)
 		add_library( Common_FX OBJECT ${FX_SOURCES} )
 		target_link_libraries( Common_FX PRIVATE cinder )
