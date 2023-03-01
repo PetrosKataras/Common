@@ -47,11 +47,9 @@ void BlurFx::apply( ci::gl::FboRef readFbo, ci::gl::FboRef writeFbo, const gl::T
 	if( ! mBlurBatch )
 		createBatch( writeFbo->getBounds() );
 
-	auto anim = sin( ci::app::getElapsedSeconds() ) * 0.5 + 0.5;
-	auto itensity = .6f;
 	size_t iterations = 8;
 	for( size_t i = 0; i < iterations; i++ ) {
-		auto radius = ( iterations - i - 1 ) * itensity;
+		auto radius = ( iterations - i - 1 ) * mIntensity;
 		{ // HORIZONTAL BLUR
 			const gl::ScopedFramebuffer scopedBlurBuffer( mFboBlur[0] );	
 			gl::clear( ColorA( 0, 0, 0, 0 ) );
